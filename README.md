@@ -23,3 +23,10 @@ This repo has server codes for creating a blogging web application for which tec
 - flask db migrate
 - flask db upgrade
 - flask db downgrade to revert previous changes
+
+- from werkzeug.security import generate_password_hash, check_password_hash
+
+- pip install flask-login 
+- Instantiate LoginManager in __init.py__ file
+- Add UserMaxim function in models
+- add user_loader function in functions.
