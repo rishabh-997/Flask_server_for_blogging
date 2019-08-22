@@ -143,10 +143,11 @@ def recieve():
     movie_name = request.get_json()
     title = movie_name['title']
     writer = movie_name['writer']
+    url = movie_name['url']
 
-    answer = "The movie " + title + " was written by " + writer
+    return render_template('movie.html', mtitle=title, mwriter=writer, murl=url)
+    # return jsonify({'result': answer})
 
-    return jsonify({'result': answer})
 # @app.route lines above the function are decorators
 # A common pattern with decorators is to use them to register functions as callbacks for certain events
 # This means that when a web browser requests either of these two URLs,
