@@ -4,7 +4,7 @@ from flask import render_template, flash, redirect
 from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User
-from flask import request
+from flask import request, jsonify
 from werkzeug.urls import url_parse
 
 
@@ -82,6 +82,7 @@ def before_request():
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
 
+
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -98,6 +99,54 @@ def edit_profile():
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form)
 
+
+@app.route('/follow/<username>')
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('User {} not found.'.format(username))
+        return redirect('index')
+    if user == current_user:
+        flash('You cannot follow yourself!')
+        return redirect('user', username=username)
+    current_user.follow(user)
+    db.session.commit()
+    flash('You are following {}!'.format(username))
+    return redirect('user', username=username)
+
+
+@app.route('/unfollow/<username>')
+@login_required
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('User {} not found.'.format(username))
+        return redirect('index')
+    if user == current_user:
+        flash('You cannot unfollow yourself!')
+        return redirect('user', username=username)
+    current_user.unfollow(user)
+    db.session.commit()
+    flash('You are not following {}.'.format(username))
+    return redirect('user', username=username)
+
+
+@app.route('/testing')
+def test():
+    movies = []
+    return jsonify({'movies': movies})
+
+
+@app.route('/send_image_url', methods=['POST'])
+def recieve():
+    movie_name = request.get_json()
+    title = movie_name['title']
+    writer = movie_name['writer']
+
+    answer = "The movie " + title + " was written by " + writer
+
+    return jsonify({'result': answer})
 # @app.route lines above the function are decorators
 # A common pattern with decorators is to use them to register functions as callbacks for certain events
 # This means that when a web browser requests either of these two URLs,
