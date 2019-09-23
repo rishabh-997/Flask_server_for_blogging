@@ -1,11 +1,13 @@
 from datetime import datetime
-from app import app, db
+
 from flask import render_template, flash, redirect
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
-from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
 from flask import request, jsonify
+from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
+
+from app import app, db
+from app.forms import LoginForm, RegistrationForm, EditProfileForm
+from app.models import User
 
 
 @app.route('/')
@@ -137,16 +139,24 @@ def test():
     movies = []
     return jsonify({'movies': movies})
 
-
 @app.route('/send_image_url', methods=['POST'])
 def recieve():
     movie_name = request.get_json()
     title = movie_name['title']
     writer = movie_name['writer']
     url = movie_name['url']
-
-    return render_template('movie.html', mtitle=title, mwriter=writer, murl=url)
-    # return jsonify({'result': answer})
+    import PIL
+    # image loading libraries down
+    from PIL import Image
+    import requests
+    from io import BytesIO
+    import numpy as np
+    response = requests.get(url)
+    img=Image.open(BytesIO(response.content))
+    img = np.array(img)
+    image_shape = str(img.shape[0])+','+str(img.shape[1])
+    # return render_template('movie.html', mtitle=title, mwriter=writer, murl=url)
+    return jsonify({'result':image_shape})
 
 # @app.route lines above the function are decorators
 # A common pattern with decorators is to use them to register functions as callbacks for certain events
